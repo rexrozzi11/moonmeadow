@@ -66,6 +66,19 @@
   button.submit-btn:disabled{opacity:.6;cursor:default;transform:none;box-shadow:none;}
 
   .form-note{text-align:center;font-size:.8rem;color:var(--sage);margin-top:18px;}
+  .mail-fallback{
+    margin-top:20px;padding:18px;background:rgba(168,180,144,0.14);
+    border:1px solid var(--line);border-radius:10px;text-align:center;
+  }
+  .mail-fallback[hidden]{display:none;}
+  .mail-fallback p{margin:0;color:var(--forest);font-size:.9rem;}
+  .mail-options{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px;}
+  .mail-option{
+    display:inline-block;padding:8px 14px;border:1px solid var(--forest);border-radius:999px;
+    color:var(--forest);font-size:.78rem;text-decoration:none;cursor:pointer;background:transparent;
+    font-family:'Jost',sans-serif;
+  }
+  .mail-option:hover{background:var(--forest);color:var(--ivory);}
 
   footer{
     background:var(--forest);color:rgba(251,248,240,0.75);text-align:center;
@@ -118,7 +131,14 @@
         <button type="submit" class="submit-btn" id="submitBtn">Send Order Request</button>
       </div>
       <p class="form-note">This opens your email app with the details filled in, ready to send.</p>
-      <p class="form-note" id="mailFallback" hidden>Didn't open your email app? <a href="mailto:moonandmeadow.bakery@gmail.com">Email us directly</a>.</p>
+      <div class="mail-fallback" id="mailFallback" hidden>
+        <p>Your email app did not open. Choose a webmail option instead:</p>
+        <div class="mail-options">
+          <a class="mail-option" id="gmailLink" target="_blank" rel="noopener">Open Gmail</a>
+          <a class="mail-option" id="outlookLink" target="_blank" rel="noopener">Open Outlook</a>
+          <button class="mail-option" type="button" id="copyEmail">Copy email details</button>
+        </div>
+      </div>
     </form>
   </div>
 </main>
@@ -130,6 +150,11 @@
 <script>
   const form = document.getElementById('orderForm');
   const TO_EMAIL = 'moonandmeadow.bakery@gmail.com';
+  const fallback = document.getElementById('mailFallback');
+  const gmailLink = document.getElementById('gmailLink');
+  const outlookLink = document.getElementById('outlookLink');
+  const copyEmail = document.getElementById('copyEmail');
+  let emailBody = '';
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -144,16 +169,26 @@
       `Name: ${firstName} ${lastName}\n` +
       `Email: ${email}\n\n` +
       `What they're looking for:\n${description}`;
+    emailBody = `To: ${TO_EMAIL}\nSubject: ${subject}\n\n${body}`;
 
     const mailto = `mailto:${TO_EMAIL}` +
       `?subject=${encodeURIComponent(subject)}` +
       `&body=${encodeURIComponent(body)}`;
 
+    gmailLink.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(TO_EMAIL)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    outlookLink.href = `https://outlook.live.com/mail/0/deeplink/compose?to=${encodeURIComponent(TO_EMAIL)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.assign(mailto);
+    fallback.hidden = false;
+  });
 
-    window.setTimeout(() => {
-      document.getElementById('mailFallback').hidden = false;
-    }, 1200);
+  copyEmail.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(emailBody);
+      copyEmail.textContent = 'Copied';
+      window.setTimeout(() => { copyEmail.textContent = 'Copy email details'; }, 1800);
+    } catch {
+      copyEmail.textContent = 'Copy unavailable';
+    }
   });
 </script>
 
