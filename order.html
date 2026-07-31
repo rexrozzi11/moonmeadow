@@ -118,7 +118,7 @@
         <button type="submit" class="submit-btn" id="submitBtn">Send Order Request</button>
       </div>
       <p class="form-note">This opens your email app with the details filled in, ready to send.</p>
-      <p class="form-note">Nothing happen? <a href="mailto:moonandmeadow.bakery@gmail.com">Email us directly</a>.</p>
+      <p class="form-note" id="mailFallback" hidden>Didn't open your email app? <a href="mailto:moonandmeadow.bakery@gmail.com">Email us directly</a>.</p>
     </form>
   </div>
 </main>
@@ -149,7 +149,11 @@
       `?subject=${encodeURIComponent(subject)}` +
       `&body=${encodeURIComponent(body)}`;
 
-    window.location.href = mailto;
+    window.location.assign(mailto);
+
+    window.setTimeout(() => {
+      document.getElementById('mailFallback').hidden = false;
+    }, 1200);
   });
 </script>
 
